@@ -14,17 +14,18 @@ class Move(ModelSQL, ModelView):
 
         today = ir_date_obj.today()
         return [
-            'AND',
-            [
+            'AND', [
                 ('from_location.type', '=', 'supplier'),
                 ('shipment_in', '=', False),
                 ('state', '=', 'draft'),
                 ('planned_date', '<', today),
-            ],
-            [
-            'OR', [('purchase_line', '=', False)],
-                  [('purchase_line.purchase.party.update_planned_date', '=',
-                        True)],
+            ], [
+                'OR', [
+                    ('purchase_line', '=', False)
+                ], [
+                    ('purchase_line.purchase.party.update_planned_date',
+                     '=', True)
+                ],
             ]
         ]
 

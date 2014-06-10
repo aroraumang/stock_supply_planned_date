@@ -3,9 +3,11 @@
 # this repository contains the full copyright notices and license terms.
 from __future__ import with_statement
 
-import sys, os
-DIR = os.path.abspath(os.path.normpath(os.path.join(__file__,
-     '..', '..', '..', '..', '..', 'trytond')))
+import sys
+import os
+DIR = os.path.abspath(os.path.normpath(os.path.join(
+    __file__, '..', '..', '..', '..', '..', 'trytond'
+)))
 if os.path.isdir(DIR):
     sys.path.insert(0, os.path.dirname(DIR))
 
@@ -45,10 +47,10 @@ class MoveUpdateTestCase(unittest.TestCase):
 
     def test0010move_update_test(self):
         """Test update_planned_date"""
-        with Transaction().start(DB_NAME, USER, CONTEXT) as transaction:
+        with Transaction().start(DB_NAME, USER, CONTEXT):
             category_id = self.category.create({
                 'name': 'Test Move.update_planned_dates',
-                })
+            })
             unit_id, = self.uom.search([('name', '=', 'Unit')])
             product_id = self.product.create({
                 'name': 'Test Move.update_planned_dates',
@@ -56,23 +58,25 @@ class MoveUpdateTestCase(unittest.TestCase):
                 'category': category_id,
                 'cost_price_method': 'fixed',
                 'default_uom': unit_id,
-                })
+            })
             supplier_id, = self.location.search([('code', '=', 'SUP')])
             customer_id, = self.location.search([('code', '=', 'CUS')])
             storage_id, = self.location.search([('code', '=', 'STO')])
             company_id, = self.company.search([('name', '=', 'B2CK')])
-            currency_id = self.company.read(company_id,
-                    ['currency'])['currency']
+            currency_id = self.company.read(
+                company_id,
+                ['currency']
+            )['currency']
             self.user.write(USER, {
                 'main_company': company_id,
                 'company': company_id,
-                })
+            })
             cron_user = self.ir_model_data.get_id(
                 'stock_supply', 'user_generate_request')
             self.user.write(cron_user, {
                 'main_company': company_id,
                 'company': company_id,
-                })
+            })
 
             today = datetime.date.today()
 
@@ -83,7 +87,7 @@ class MoveUpdateTestCase(unittest.TestCase):
                 'company': company_id,
                 'unit_price': Decimal('1'),
                 'currency': currency_id,
-                }
+            }
             combinations = (
                 (supplier_id, storage_id, -5, 'done'),
                 (supplier_id, storage_id, -4, 'draft'),
@@ -102,14 +106,11 @@ class MoveUpdateTestCase(unittest.TestCase):
                 })
                 self.move.create(values)
 
-
             self.assertEqual(
                 self.move.search([
                         ('state', '=', 'draft'),
                         ('planned_date', '<', today),
-                    ], count=True), 2)
-
-
+                ], count=True), 2)
 
             with Transaction().set_user(cron_user):
                 self.move.update_supply_planned_date()
@@ -118,13 +119,13 @@ class MoveUpdateTestCase(unittest.TestCase):
                 self.move.search([
                         ('state', '=', 'draft'),
                         ('planned_date', '<', today),
-                    ], count=True), 1)
+                ], count=True), 1)
             self.assertEqual(
                 self.move.search([
                         ('state', '=', 'draft'),
                         ('from_location.type', '=', 'supplier'),
                         ('planned_date', '<', today),
-                    ], count=True), 0)
+                ], count=True), 0)
 
     def setup_chart_of_accounts(self, company):
         account_template, = self.account_template_obj.search(
@@ -132,23 +133,21 @@ class MoveUpdateTestCase(unittest.TestCase):
 
         wiz_id = self.create_chart_account_obj.create()
         self.create_chart_account_obj.execute(wiz_id, {}, 'account')
-        self.create_chart_account_obj.execute(wiz_id,
-            {
-                'form': {
+        self.create_chart_account_obj.execute(wiz_id, {
+            'form': {
                     'account_template': account_template,
                     'company': company,
-                    }
-            }, 'create_account'
-        )
+            }
+        }, 'create_account')
 
     def test0020_party_flag(self):
-        """Assert that the `update_planned_date` flag on party is respected 
-        when the move planned date update is done
+        """Assert that the `update_planned_date` flag on party is respected
+         when the move planned date update is done
         """
-        with Transaction().start(DB_NAME, USER, CONTEXT) as transaction:
+        with Transaction().start(DB_NAME, USER, CONTEXT):
             category_id = self.category.create({
                 'name': 'Test Move.update_planned_dates',
-                })
+            })
             unit_id, = self.uom.search([('name', '=', 'Unit')])
 
             supplier_id, = self.location.search([('code', '=', 'SUP')])
@@ -160,13 +159,13 @@ class MoveUpdateTestCase(unittest.TestCase):
             self.user.write(USER, {
                 'main_company': company_id,
                 'company': company_id,
-                })
+            })
             cron_user = self.ir_model_data.get_id(
                 'stock_supply', 'user_generate_request')
             self.user.write(cron_user, {
                 'main_company': company_id,
                 'company': company_id,
-                })
+            })
 
             # Setup the chart of accounts which will setup useful accounts
             # required to create party and purchase
@@ -175,14 +174,10 @@ class MoveUpdateTestCase(unittest.TestCase):
             receivable_id, = self.account.search([('kind', '=', 'receivable')])
             account_expense, = self.account.search([('kind', '=', 'expense')])
 
-            currency_id = self.company.read(company_id,
-                    ['currency'])['currency']
-            payment_term = self.payment_term.create({
-                'name': 'Default',
-                'lines': [
-                    ('create', {'type': 'remainder'})
-                ]
-                })
+            currency_id = self.company.read(
+                company_id,
+                ['currency']
+            )['currency']
 
             # Create a product to test
             product_id = self.product.create({
@@ -194,7 +189,7 @@ class MoveUpdateTestCase(unittest.TestCase):
                 'purchase_uom': unit_id,
                 'purchasable': True,
                 'account_expense': account_expense,
-                })
+            })
 
             # Create two parties one with the update flag and other without it
             party_wo_update_id = self.party.create({
@@ -202,13 +197,13 @@ class MoveUpdateTestCase(unittest.TestCase):
                 'update_planned_date': False,
                 'account_receivable': receivable_id,
                 'account_payable': payable_id,
-                })
+            })
             party_wo_update = self.party.browse(party_wo_update_id)
             party_with_update_id = self.party.create({
                 'name': 'Test Party with update flag',
                 'account_receivable': receivable_id,
                 'account_payable': payable_id,
-                })
+            })
             party_with_update = self.party.browse(party_with_update_id)
 
             today = datetime.date.today()
@@ -228,7 +223,7 @@ class MoveUpdateTestCase(unittest.TestCase):
                         'product': product_id,
                         'unit_price': Decimal('1'),
                         'description': 'Test Purchase',
-                        })
+                    })
                 ]
             }
             # Create first order with party w/o update flag
@@ -246,7 +241,6 @@ class MoveUpdateTestCase(unittest.TestCase):
                 self.purchase.workflow_trigger_validate(ids, 'quotation')
                 self.purchase.workflow_trigger_validate(ids, 'confirm')
 
-            orders = self.purchase.browse(ids)
             move_ids = self.move.search([])
             self.move.write(move_ids, {'planned_date': past_date})
             moves = self.move.browse(move_ids)
@@ -268,16 +262,16 @@ class MoveUpdateTestCase(unittest.TestCase):
             past_moves = self.move.search([
                     ('state', '=', 'draft'),
                     ('planned_date', '<', today),
-                    ])
+            ])
             self.assertEqual(len(past_moves), 1)
             past_move = self.move.browse(past_moves[0])
             self.assertEqual(past_move.supplier.update_planned_date, False)
 
             self.assertEqual(
                 self.move.search([
-                        ('state', '=', 'draft'),
-                        ('planned_date', '<=', today),
-                    ], count=True), 2)
+                    ('state', '=', 'draft'),
+                    ('planned_date', '<=', today),
+                ], count=True), 2)
 
 
 def suite():

@@ -3,17 +3,17 @@
 
 
 {
-    "name" : "Stock Update Planned Date",
-    "version" : "2.0.0.1",
-    "author" : "Openlabs Technologies & Consulting (P) Limited",
+    "name": "Stock Update Planned Date",
+    "version": "2.0.0.1",
+    "author": "Openlabs Technologies & Consulting (P) Limited",
     'email': 'info@openlabs.co.in',
     'website': 'http://www.openlabs.co.in/',
     "description": """Updates planned date of late incoming stock moves.""",
-    "depends" : [
+    "depends": [
         "stock_supply",
         "ir",
     ],
-    "xml" : [
+    "xml": [
         "party.xml",
         "move.xml",
     ],
